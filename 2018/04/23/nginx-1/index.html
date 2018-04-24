@@ -90,7 +90,7 @@
 <meta property="og:image" content="http://littlewhitejing.github.io/2018/04/23/nginx-1/nginx1.png">
 <meta property="og:image" content="http://littlewhitejing.github.io/2018/04/23/nginx-1/nginx2.png">
 <meta property="og:image" content="http://littlewhitejing.github.io/2018/04/23/nginx-1/nginx3.png">
-<meta property="og:updated_time" content="2018-04-24T06:33:32.459Z">
+<meta property="og:updated_time" content="2018-04-24T06:40:54.698Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Nginx工作原理分析">
 <meta name="twitter:description" content="本文从Nginx的模块，进程模型，事件模型等入手，以http请求处理流程为线索，剖析Nginx的工作原理。">
@@ -404,9 +404,9 @@
 <ul>
 <li><p>调用 int epoll_create(int size)建立一个epoll对象，内核会创建一个eventpoll结构体，用于存放通过epoll_ctl()向epoll对象中添加进来的事件，这些事件都会挂载在红黑树中。</p>
 </li>
-<li><p>调用 int epoll_ctl(int epfd, int op, int fd, struct epoll_event *event) 在 epoll 对象中为 fd 注册事件，所有添加到epoll中的事件<br>  都会与设备驱动程序建立回调关系，也就是说，当相应的事件发生时会调用这个sockfd的回调方法，将sockfd添加到eventpoll 中的双链表</p>
+<li><p>调用 int epoll_ctl(int epfd, int op, int fd, struct epoll_event *event) 在 epoll 对象中为 fd 注册事件，所有添加到epoll中的事件都会与设备驱动程序建立回调关系，也就是说，当相应的事件发生时会调用这个sockfd的回调方法，将sockfd添加到eventpoll 中的双链表。</p>
 </li>
-<li><p>调用 int epoll_wait(int epfd, struct epoll_event * events, int maxevents, int timeout) 来等待事件的发生，timeout 为 -1 时，该<br>  调用会阻塞知道有事件发生</p>
+<li><p>调用 int epoll_wait(int epfd, struct epoll_event * events, int maxevents, int timeout) 来等待事件的发生，timeout 为 -1 时，该调用会阻塞知道有事件发生。</p>
 </li>
 </ul>
 <p>这样，注册好事件之后，只要有 fd 上事件发生，epoll_wait() 就能检测到并返回给Nginx进程，进程就能”非阻塞“地进行 I/O 了。</p>

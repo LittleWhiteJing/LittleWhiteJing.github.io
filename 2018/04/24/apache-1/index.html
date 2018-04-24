@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="web服务器,底层数据结构," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="本文主要从架构和底层实现的角度剖析Apache的运行机制和优化方法。">
+<meta name="keywords" content="web服务器,底层数据结构">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Apache运行机制剖析">
+<meta property="og:url" content="http://LittleWhiteJing.github.io/2018/04/24/apache-1/index.html">
+<meta property="og:site_name" content="思想的碎叶">
+<meta property="og:description" content="本文主要从架构和底层实现的角度剖析Apache的运行机制和优化方法。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://littlewhitejing.github.io/2018/04/24/apache-1/apache1.jpg">
+<meta property="og:image" content="http://littlewhitejing.github.io/2018/04/24/apache-1/apache3.jpg">
+<meta property="og:image" content="http://littlewhitejing.github.io/2018/04/24/apache-1/apache4.jpg">
+<meta property="og:updated_time" content="2018-04-24T11:58:11.911Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Apache运行机制剖析">
+<meta name="twitter:description" content="本文主要从架构和底层实现的角度剖析Apache的运行机制和优化方法。">
+<meta name="twitter:image" content="http://littlewhitejing.github.io/2018/04/24/apache-1/apache1.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://LittleWhiteJing.github.io/2018/04/24/apache-1/"/>
+
+
+
+
+
+  <title>Apache运行机制剖析 | 思想的碎叶</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">思想的碎叶</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://LittleWhiteJing.github.io/2018/04/24/apache-1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="littexjing">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="思想的碎叶">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Apache运行机制剖析</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-24T16:36:51+08:00">
+                2018-04-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>本文主要从架构和底层实现的角度剖析Apache的运行机制和优化方法。</p>
+<a id="more"></a>
+<h2 id="Apache的组件构成"><a href="#Apache的组件构成" class="headerlink" title="Apache的组件构成"></a>Apache的组件构成</h2><p>Apache是基于模块化设计的，总体看起来代码的可读性高于php代码。它的核心代码并不多，大多数功能被分散到各个模块中，各个模块在系统启动时按需载入。系统最主要的处理逻辑包含在main.c文件中。</p>
+<p>MPM(Multi-Processing Modules，多路处理模块)是Apache的核心组件之一，Apache通过MPM来使用操作系统的资源，对进程和线程进行管理。Apache为了能够获得最好的运行性能，针对不同的平台(Unix/Linux，Windows)做了优化，为不同的平台提供了不同的MPM，用户可以根据实际情况进行选择，其中最常用的MPM有prefork和worker两种。</p>
+<p>至于您的服务器正以哪种方式运行，取决于安装Apache过程中指定的MPM编译参数,在X系统上默认的编译参数为 prefork。由于大多数的Unix都不支持真正的线程，所以采用了预派生子进程(prefork)方式，象Windows或者Solaris这些支持 线程的平台，基于多进程多线程混合的worker模式是一种不错的选择。</p>
+<p>Apache中还有一个重要的 组件就是APR（Apache portable Runtime Library），即Apache可移植运行库，它是一个对操作系统调用的抽象库，用来实现Apache内部组件对操作系统的使用，提高系统的可移植性。 Apache对于php的解析，就是通过众多Module中的php Module来完成的。</p>
+<p><img src="/2018/04/24/apache-1/apache1.jpg" alt=""></p>
+<h2 id="Apache的两种工作模式"><a href="#Apache的两种工作模式" class="headerlink" title="Apache的两种工作模式"></a>Apache的两种工作模式</h2><p>Apache服务主要支持两种工作模式：prefork和worker。</p>
+<h3 id="prefork的工作原理"><a href="#prefork的工作原理" class="headerlink" title="prefork的工作原理"></a>prefork的工作原理</h3><p>一个单独的控制进程(父进程)负责产生子进程，这些子进程用于监听请求并作出应答。Apache总是试图保持一些备用(spare)的或是空闲的子进程用于迎接即将到来的请求，这样客户端就无需在得到服务前等候子进程的产生。在Unix系统中，父进程通常以root身份运行以便邦定80端口，而 Apache产生的子进程通常以一个低特权的用户运行。User和Group指令用于配置子进程的低特权用户。运行子进程的用户必须要对他所服务的内容有读取的权限，但是对服务内容之外的其他资源必须拥有尽可能少的权限。</p>
+<h3 id="prefork的配置说明"><a href="#prefork的配置说明" class="headerlink" title="prefork的配置说明"></a>prefork的配置说明</h3><p>如果不用“–with-mpm”显式指定某种MPM，prefork就是Unix平台上缺省的MPM。它所采用的预派生子进程方式也是Apache 1.3中采用的模式。prefork本身并没有使用到线程，2.0版使用它是为了与1.3版保持兼容性；另一方面，prefork用单独的子进程来处理不同的请求，进程之间是彼此独立的，这也使其成为最稳定的MPM之一。</p>
+<p>若使用prefork，在make编译和make install安装后，使用“httpd -l”来确定当前使用的MPM，应该会看到prefork.c（如果看到worker.c说明使用的是worker MPM，依此类推）。再查看缺省生成的httpd.conf配置文件，里面包含如下配置段：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&lt;IfModule prefork.c&gt;  </span><br><span class="line">  StartServers 5  </span><br><span class="line">  MinSpareServers 5  </span><br><span class="line">  MaxSpareServers 10  </span><br><span class="line">  MaxClients 150  </span><br><span class="line">  MaxRequestsPerChild 0  </span><br><span class="line">&lt;/IfModule&gt;</span><br></pre></td></tr></table></figure>
+<p>控制进程在最初建立“StartServers”个子进程后，为了满足MinSpareServers设置的需要创建一个进程，等待一秒钟，继续创建两个，再等待一秒钟，继续创建四个……如此按指数级增加创建的进程数，最多达到每秒32个，直到满足MinSpareServers设置的值为止。这就是预派生（prefork）的由来。这种模式可以不必在请求到来时再产生新的进程，从而减小了系统开销以增加性能。</p>
+<ul>
+<li><p>当并发量请求数到达MaxClients（如256）时，而空闲进程只有10个。apache为继续增加创建进程。直到进程数到达256个。</p>
+</li>
+<li><p>当并发量高峰期过去了，并发请求数可能只有一个时，apache逐渐删除进程，直到进程数到达MaxSpareServers为止</p>
+</li>
+</ul>
+<h3 id="prefork配置项"><a href="#prefork配置项" class="headerlink" title="prefork配置项"></a>prefork配置项</h3><p><strong>StartServers</strong>:指定服务器启动时建立的子进程数量，prefork默认为5。</p>
+<p><strong>MinSpareServers</strong>:指定空闲子进程的最小数量，默认为5。假如当前空闲子进程数少于MinSpareServers ，那么Apache将以最大每秒一个的速度产生新的子进程。此参数不要设的太大。</p>
+<p><strong>MaxSpareServers</strong>:设置了最大的空闲进程数，默认为10。如果空闲进程数大于这个值，Apache父进程会自动kill掉一些多余子进程。这个值不要设得过大，但如果设的值比MinSpareServers小，Apache会自动把其调整为MinSpareServers+1。如果站点负载较大，可考虑同时加大MinSpareServers和MaxSpareServers。</p>
+<p><strong>MaxRequestsPerChild</strong>:设置的是每个子进程可处理的请求数。每个子进程在处理了“MaxRequestsPerChild”个请求后将自动销毁。0意味着无限，即子进程永不销毁。虽然缺省设为0可以使每个子进程处理更多的请求。</p>
+<p><strong>MaxClients</strong>:是这些指令中最为重要的一个，设定的是Apache可以同时处理的请求，是对Apache性能影响最大的参数。</p>
+<p>其缺省值150是远远不够的，如果请求总数已达到这个值（可通过ps -ef|grep http|wc -l来确认），那么后面的请求就要排队，直到某个已处理请求完毕。这就是系统资源还剩下很多而HTTP访问却很慢的主要原因。系统管理员可以根据硬件配置和负载情况来动态调整这个值。</p>
+<p>虽然理论上这个值越大，可以处理的请求就越多，但在Apache1.3默认的最大只能设置为256（这是个硬限制）。如果把这个值设为大于256，那么Apache将无法起动。事实上，256对于负载稍重的站点也是不够的。如果要加大这个值，必须在“configure”前手工修改的源代码树下的src/include/httpd.h中查找256，就会发现“#define HARD_SERVER_LIMIT 256”这行。把256改为要增大的值（如4000），然后重新编译Apache即可。</p>
+<p>在Apache 2.0中，新加入了ServerLimit指令，可以突破最大请求数为256的限制。 使得无须重编译Apache就可以加大MaxClients。</p>
+<h3 id="worker的工作原理"><a href="#worker的工作原理" class="headerlink" title="worker的工作原理"></a>worker的工作原理</h3><p>每个进程能够拥有的线程数量是固定的。服务器会根据负载情况增加或减少进程数量。一个单独的控制进程(父进程)负责子进程的建立。每个子进程能够建立ThreadsPerChild数量的服务线程和一个监听线程，该监听线程监听接入请求并将其传递给服务线程处理和应答。Apache总是试图维持一个备用(spare)或是空闲的服务线程池。这样，客户端无须等待新线程或新进程的建立即可得到处理。在Unix中，为了能够绑定80端口，父进程一般都是以root身份启动，随后，Apache以较低权限的用户建立子进程和线程。User和Group指令用于配置Apache子进程的权限。虽然子进程必须对其提供的内容拥有读权限，但应该尽可能给予他较少的特权。另外，除非使用了suexec ，否则，这些指令配置的权限将被CGI脚本所继承。</p>
+<h3 id="worker的配置说明"><a href="#worker的配置说明" class="headerlink" title="worker的配置说明"></a>worker的配置说明</h3><p>在configure -with-mpm=worker后，进行make编译、make install安装。在缺省生成的httpd.conf中有以下配置段：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&lt;IfModule worker.c&gt;  </span><br><span class="line">  StartServers 2  </span><br><span class="line">  MaxClients 150  </span><br><span class="line">  MinSpareThreads 25  </span><br><span class="line">  MaxSpareThreads 75  </span><br><span class="line">  ThreadsPerChild 25  </span><br><span class="line">  MaxRequestsPerChild 0  </span><br><span class="line">&lt;/IfModule&gt;</span><br></pre></td></tr></table></figure>
+<p>由主控制进程生成“StartServers”个子进程，每个子进程中包含固定的ThreadsPerChild线程数，各个线程独立地处理请求。同样，为了不在请求到来时再生成线程，MinSpareThreads和MaxSpareThreads设置了最少和最多的空闲线程数；而MaxClients设置了所有子进程中的线程总数。如果现有子进程中的线程总数不能满足负载，控制进程将派生新的子进程。</p>
+<h3 id="worker配置项"><a href="#worker配置项" class="headerlink" title="worker配置项"></a>worker配置项</h3><p><strong>StartServers</strong>:服务器启动时建立的子进程数，默认值是”3”。</p>
+<p><strong>MinSpareThreads</strong>:最小空闲线程数,默认值是”75”。这个MPM将基于整个服务器监控空闲线程数。假如服务器中总的空闲线程数太少，子进程将产生新的空闲线程。</p>
+<p><strong>MaxSpareThreads</strong>:配置最大空闲线程数。默认值是”250”。这个MPM将基于整个服务器监控空闲线程数。假如服 务器中总的空闲线程数太多，子进程将杀死多余的空闲线程。MaxSpareThreads的取值范围是有限制的。Apache将按照如下限制自动修正您配置的值：worker需要其大于等于MinSpareThreads加上ThreadsPerChild的和。</p>
+<p>MinSpareThreads和MaxSpareThreads这两个参数对Apache的性能影响并不大，可以按照实际情况相应调节。</p>
+<p><strong>MaxClients</strong>:允许同时伺服的最大接入请求数量(最大线程数量)。任何超过MaxClients限制的请求都将进入等候 队列。默认值是”400”,16 (ServerLimit)乘以25(ThreadsPerChild)的结果。因此要增加MaxClients的时候，您必须同时增加 ServerLimit的值。</p>
+<p><strong>ThreadsPerChild</strong>:每个子进程建立的常驻的执行线程数。默认值是25。子进程在启动时建立这些线程后就不再建立新的线程了。</p>
+<p><strong>MaxRequestsPerChild</strong>:配置每个子进程在其生存期内允许伺服的最大请求数量。到达MaxRequestsPerChild的限制后，子进程将会结束。假如MaxRequestsPerChild为”0”，子进程将永远不会结束。</p>
+<h2 id="Apache的运行流程"><a href="#Apache的运行流程" class="headerlink" title="Apache的运行流程"></a>Apache的运行流程</h2><h3 id="启动阶段"><a href="#启动阶段" class="headerlink" title="启动阶段"></a>启动阶段</h3><p>在启动阶段，Apache主要进行配置文件解析(例如http.conf以及Include指令设定的配置文件等)、模块加载(例如mod_php.so,mod_perl.so等)和系统资源初始化（例如日志文件、共享内存段等）工作。在这个阶段，Apache为了获得系统资源最大的使用权限，将以特权用户root（X系统）或超级管理员administrator(Windows系统)完成启动。</p>
+<p>这一过程可以参考如下示意图。</p>
+<p><img src="/2018/04/24/apache-1/apache3.jpg" alt=""></p>
+<h3 id="运行阶段"><a href="#运行阶段" class="headerlink" title="运行阶段"></a>运行阶段</h3><p>在运行阶段，Apache主要工作是处理用户的服务请求。在这个阶段，Apache放弃特权用户级别，使用普通权限，这主要是基于安全性的考虑，防止由于代码的缺陷引起的安全漏洞。</p>
+<p>Apache将请求处理循环分为11个阶段，如下图所示。</p>
+<p><img src="/2018/04/24/apache-1/apache4.jpg" alt=""></p>
+<h4 id="Apache的Hook机制"><a href="#Apache的Hook机制" class="headerlink" title="Apache的Hook机制"></a>Apache的Hook机制</h4><p>Apache 允许模块(包括内部模块和外部模块，例如mod_php5.so,mod_perl.so等)将自定义的函数注入到请求处理循环中。换句话说，模块可以在 Apache的任何一个处理阶段中挂接(Hook)上自己的处理函数，从而参与Apache的请求处理过程。</p>
+<h4 id="Apache请求处理循环"><a href="#Apache请求处理循环" class="headerlink" title="Apache请求处理循环"></a>Apache请求处理循环</h4><p>1.Post-Read-Request阶段</p>
+<p>在正常请求处理流程中，这是模块可以插入钩子的第一个阶段。对于那些想很早进入处理请求的模块来说，这个阶段可以被利用。</p>
+<p>2.URI Translation阶段</p>
+<p>Apache在本阶段的主要工作：将请求的URL映射到本地文件系统。模块可以在这阶段插入钩子，执行自己的映射逻辑。mod_alias就是利用这个阶段工作的。</p>
+<p>3.Header Parsing阶段</p>
+<p>Apache在本阶段的主要工作：检查请求的头部。由于模块可以在请求处理流程的任何一个点上执行检查请求头部的任务，因此这个钩子很少被使用。mod_setenvif就是利用这个阶段工作的。</p>
+<p>4.Access Control阶段</p>
+<p>Apache在本阶段的主要工作：根据配置文件检查是否允许访问请求的资源。Apache的标准逻辑实现了允许和拒绝指令。mod_authz_host就是利用这个阶段工作的。</p>
+<p>5.Authentication阶段</p>
+<p>Apache在本阶段的主要工作：按照配置文件设定的策略对用户进行认证，并设定用户名区域。模块可以在这阶段插入钩子，实现一个认证方法。</p>
+<p>6.Authorization阶段</p>
+<p>Apache在本阶段的主要工作：根据配置文件检查是否允许认证过的用户执行请求的操作。模块可以在这阶段插入钩子，实现一个用户权限管理的方法。</p>
+<p>7.MIME Type Checking阶段</p>
+<p>Apache在本阶段的主要工作：根据请求资源的MIME类型的相关规则，判定将要使用的内容处理函数。标准模块mod_negotiation和mod_mime实现了这个钩子。</p>
+<p>8.FixUp阶段</p>
+<p>这是一个通用的阶段，允许模块在内容生成器之前，运行任何必要的处理流程。和Post_Read_Request类似，这是一个能够捕获任何信息的钩子，也是最常使用的钩子。</p>
+<p>9.Response阶段</p>
+<p>Apache在本阶段的主要工作：生成返回客户端的内容，负责给客户端发送一个恰当的回复。这个阶段是整个处理流程的核心部分。</p>
+<p>10.Logging阶段</p>
+<p>Apache在本阶段的主要工作：在回复已经发送给客户端之后记录事务。模块可能修改或者替换Apache的标准日志记录。</p>
+<p>11.CleanUp阶段</p>
+<p>Apache在本阶段的主要工作：清理本次请求事务处理完成之后遗留的环境，比如文件、目录的处理或者Socket的关闭等等，这是Apache一次请求处理的最后一个阶段。</p>
+<h2 id="Apache性能调优的策略"><a href="#Apache性能调优的策略" class="headerlink" title="Apache性能调优的策略"></a>Apache性能调优的策略</h2><p>1.合适的内存</p>
+<p>适当选用适合大小的内存，保证谷峰负载时，有足够的内存使用。</p>
+<p>2.使用ab进行测试</p>
+<p>使用ab进行并发请求模拟，ab的缺点：不能更真实的模仿用户的操作。</p>
+<p>3.调节长连接的设定</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">KeepAlive On              #在单一连接时进行多个请求</span><br><span class="line">MaxKeepAliveRequests 200  #单一连接时间可以允许多少个保持连接的请求</span><br><span class="line">KeepAliveTimeout 15       #在没有接受其他请求时，会持续开启特定连接的时间</span><br></pre></td></tr></table></figure>
+<p>4.取得网站活动的快照</p>
+<p>启用server-status处理器来取得子进程在运行的快照</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;Location /server-status&gt;</span><br><span class="line">    SetHandler server-status</span><br><span class="line">&lt;/Location&gt;</span><br><span class="line">    ExtendedStatus On</span><br></pre></td></tr></table></figure>
+<p>5.避免DNS查询</p>
+<p>避免以DNS查询客户端地址</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HostNameLookups Off</span><br></pre></td></tr></table></figure>
+<p>6.少使用.htaccess文件</p>
+<p>只在必要的目录中启用AllowOverride，并告知Apache不要浪费时间在其他的位置上查找.htaccess文件。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">AllowOverride None</span><br></pre></td></tr></table></figure>
+<p>然后以<directory>区块启用必要的.htaccess文件</directory></p>
+<p>7.最佳化符号链接</p>
+<ul>
+<li><p>主要考虑安全防护：永远不要允许遵循符号链接</p>
+</li>
+<li><p>主要考虑性能：永远使用Options FollowSysLinks且绝不使用Options SysLinkIfOwnerMatch</p>
+</li>
+</ul>
+<p>8.最佳化进程的产生</p>
+<p>MinSpareServers MaxSpareServers 控制服务器池的大小，以便有子进程等待服务引入的请求（永远不要发生，当请求送至网站却没有闲置的服务器进程在等待处理请求的情形）</p>
+<p>9.调节线程的产生</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;IfModule mpm_winnt.c&gt;</span><br><span class="line">    ThreadsPerChild 1000</span><br><span class="line">    MaxRequestsPerChild 8000</span><br><span class="line">    Win32DisableAcceptEx</span><br><span class="line">&lt;/IfModule&gt;</span><br></pre></td></tr></table></figure>
+<p>10.将经常查看的文件存入高速缓存区</p>
+<ul>
+<li>使用MMapFile将文件内容存入内存的高速缓冲区</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">MMapFile /www/xxx/index.html</span><br><span class="line">MMapFile /www/xxx/otherpage.html</span><br></pre></td></tr></table></figure>
+<ul>
+<li>使用CacheFile将文件句柄存入内存的高速缓冲区，稍微降低系统性能，但是占用内存较少</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">CacheFile /www/xxx/index.html</span><br><span class="line">CacheFile /www/xxx/otherpage.html</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/web服务器/" rel="tag"># web服务器</a>
+          
+            <a href="/tags/底层数据结构/" rel="tag"># 底层数据结构</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/04/24/io多路复用详解/" rel="next" title="IO多路复用详解">
+                <i class="fa fa-chevron-left"></i> IO多路复用详解
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">littexjing</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Apache的组件构成"><span class="nav-number">1.</span> <span class="nav-text">Apache的组件构成</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Apache的两种工作模式"><span class="nav-number">2.</span> <span class="nav-text">Apache的两种工作模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#prefork的工作原理"><span class="nav-number">2.1.</span> <span class="nav-text">prefork的工作原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#prefork的配置说明"><span class="nav-number">2.2.</span> <span class="nav-text">prefork的配置说明</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#prefork配置项"><span class="nav-number">2.3.</span> <span class="nav-text">prefork配置项</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#worker的工作原理"><span class="nav-number">2.4.</span> <span class="nav-text">worker的工作原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#worker的配置说明"><span class="nav-number">2.5.</span> <span class="nav-text">worker的配置说明</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#worker配置项"><span class="nav-number">2.6.</span> <span class="nav-text">worker配置项</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Apache的运行流程"><span class="nav-number">3.</span> <span class="nav-text">Apache的运行流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#启动阶段"><span class="nav-number">3.1.</span> <span class="nav-text">启动阶段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#运行阶段"><span class="nav-number">3.2.</span> <span class="nav-text">运行阶段</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Apache的Hook机制"><span class="nav-number">3.2.1.</span> <span class="nav-text">Apache的Hook机制</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Apache请求处理循环"><span class="nav-number">3.2.2.</span> <span class="nav-text">Apache请求处理循环</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Apache性能调优的策略"><span class="nav-number">4.</span> <span class="nav-text">Apache性能调优的策略</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">littexjing</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -88,9 +88,11 @@
 <meta property="og:description" content="本文主要从架构和底层实现的角度剖析Apache的运行机制和优化方法。">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://littlewhitejing.github.io/2018/04/24/apache-1/apache1.jpg">
+<meta property="og:image" content="http://littlewhitejing.github.io/2018/04/24/apache-1/apache5.jpg">
+<meta property="og:image" content="http://littlewhitejing.github.io/2018/04/24/apache-1/apache6.jpg">
 <meta property="og:image" content="http://littlewhitejing.github.io/2018/04/24/apache-1/apache3.jpg">
 <meta property="og:image" content="http://littlewhitejing.github.io/2018/04/24/apache-1/apache4.jpg">
-<meta property="og:updated_time" content="2018-04-24T11:58:11.911Z">
+<meta property="og:updated_time" content="2018-04-24T14:44:14.424Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Apache运行机制剖析">
 <meta name="twitter:description" content="本文主要从架构和底层实现的角度剖析Apache的运行机制和优化方法。">
@@ -343,6 +345,7 @@
 <p><img src="/2018/04/24/apache-1/apache1.jpg" alt=""></p>
 <h2 id="Apache的两种工作模式"><a href="#Apache的两种工作模式" class="headerlink" title="Apache的两种工作模式"></a>Apache的两种工作模式</h2><p>Apache服务主要支持两种工作模式：prefork和worker。</p>
 <h3 id="prefork的工作原理"><a href="#prefork的工作原理" class="headerlink" title="prefork的工作原理"></a>prefork的工作原理</h3><p>一个单独的控制进程(父进程)负责产生子进程，这些子进程用于监听请求并作出应答。Apache总是试图保持一些备用(spare)的或是空闲的子进程用于迎接即将到来的请求，这样客户端就无需在得到服务前等候子进程的产生。在Unix系统中，父进程通常以root身份运行以便邦定80端口，而 Apache产生的子进程通常以一个低特权的用户运行。User和Group指令用于配置子进程的低特权用户。运行子进程的用户必须要对他所服务的内容有读取的权限，但是对服务内容之外的其他资源必须拥有尽可能少的权限。</p>
+<p><img src="/2018/04/24/apache-1/apache5.jpg" alt=""></p>
 <h3 id="prefork的配置说明"><a href="#prefork的配置说明" class="headerlink" title="prefork的配置说明"></a>prefork的配置说明</h3><p>如果不用“–with-mpm”显式指定某种MPM，prefork就是Unix平台上缺省的MPM。它所采用的预派生子进程方式也是Apache 1.3中采用的模式。prefork本身并没有使用到线程，2.0版使用它是为了与1.3版保持兼容性；另一方面，prefork用单独的子进程来处理不同的请求，进程之间是彼此独立的，这也使其成为最稳定的MPM之一。</p>
 <p>若使用prefork，在make编译和make install安装后，使用“httpd -l”来确定当前使用的MPM，应该会看到prefork.c（如果看到worker.c说明使用的是worker MPM，依此类推）。再查看缺省生成的httpd.conf配置文件，里面包含如下配置段：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&lt;IfModule prefork.c&gt;  </span><br><span class="line">  StartServers 5  </span><br><span class="line">  MinSpareServers 5  </span><br><span class="line">  MaxSpareServers 10  </span><br><span class="line">  MaxClients 150  </span><br><span class="line">  MaxRequestsPerChild 0  </span><br><span class="line">&lt;/IfModule&gt;</span><br></pre></td></tr></table></figure>
@@ -362,6 +365,7 @@
 <p>虽然理论上这个值越大，可以处理的请求就越多，但在Apache1.3默认的最大只能设置为256（这是个硬限制）。如果把这个值设为大于256，那么Apache将无法起动。事实上，256对于负载稍重的站点也是不够的。如果要加大这个值，必须在“configure”前手工修改的源代码树下的src/include/httpd.h中查找256，就会发现“#define HARD_SERVER_LIMIT 256”这行。把256改为要增大的值（如4000），然后重新编译Apache即可。</p>
 <p>在Apache 2.0中，新加入了ServerLimit指令，可以突破最大请求数为256的限制。 使得无须重编译Apache就可以加大MaxClients。</p>
 <h3 id="worker的工作原理"><a href="#worker的工作原理" class="headerlink" title="worker的工作原理"></a>worker的工作原理</h3><p>每个进程能够拥有的线程数量是固定的。服务器会根据负载情况增加或减少进程数量。一个单独的控制进程(父进程)负责子进程的建立。每个子进程能够建立ThreadsPerChild数量的服务线程和一个监听线程，该监听线程监听接入请求并将其传递给服务线程处理和应答。Apache总是试图维持一个备用(spare)或是空闲的服务线程池。这样，客户端无须等待新线程或新进程的建立即可得到处理。在Unix中，为了能够绑定80端口，父进程一般都是以root身份启动，随后，Apache以较低权限的用户建立子进程和线程。User和Group指令用于配置Apache子进程的权限。虽然子进程必须对其提供的内容拥有读权限，但应该尽可能给予他较少的特权。另外，除非使用了suexec ，否则，这些指令配置的权限将被CGI脚本所继承。</p>
+<p><img src="/2018/04/24/apache-1/apache6.jpg" alt=""></p>
 <h3 id="worker的配置说明"><a href="#worker的配置说明" class="headerlink" title="worker的配置说明"></a>worker的配置说明</h3><p>在configure -with-mpm=worker后，进行make编译、make install安装。在缺省生成的httpd.conf中有以下配置段：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&lt;IfModule worker.c&gt;  </span><br><span class="line">  StartServers 2  </span><br><span class="line">  MaxClients 150  </span><br><span class="line">  MinSpareThreads 25  </span><br><span class="line">  MaxSpareThreads 75  </span><br><span class="line">  ThreadsPerChild 25  </span><br><span class="line">  MaxRequestsPerChild 0  </span><br><span class="line">&lt;/IfModule&gt;</span><br></pre></td></tr></table></figure>
 <p>由主控制进程生成“StartServers”个子进程，每个子进程中包含固定的ThreadsPerChild线程数，各个线程独立地处理请求。同样，为了不在请求到来时再生成线程，MinSpareThreads和MaxSpareThreads设置了最少和最多的空闲线程数；而MaxClients设置了所有子进程中的线程总数。如果现有子进程中的线程总数不能满足负载，控制进程将派生新的子进程。</p>

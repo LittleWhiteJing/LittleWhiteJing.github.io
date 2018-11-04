@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="数据库底层,并发控制,存储引擎," />
+  <meta name="keywords" content="MySQL三层架构,存储引擎特性," />
 
 
 
@@ -80,7 +80,7 @@
 
 
 <meta name="description" content="本文简要分析MySQL的三层逻辑架构，并介绍各种存储引擎的区别。">
-<meta name="keywords" content="数据库底层,并发控制,存储引擎">
+<meta name="keywords" content="MySQL三层架构,存储引擎特性">
 <meta property="og:type" content="article">
 <meta property="og:title" content="MySQL基本架构浅析">
 <meta property="og:url" content="http://LittleWhiteJing.github.io/2018/05/07/mysql-1/index.html">
@@ -88,7 +88,8 @@
 <meta property="og:description" content="本文简要分析MySQL的三层逻辑架构，并介绍各种存储引擎的区别。">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://littlewhitejing.github.io/2018/05/07/mysql-1/mysql1.png">
-<meta property="og:updated_time" content="2018-05-07T15:08:37.985Z">
+<meta property="og:image" content="http://littlewhitejing.github.io/2018/05/07/mysql-1/mysql2.png">
+<meta property="og:updated_time" content="2018-06-25T14:00:16.643Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="MySQL基本架构浅析">
 <meta name="twitter:description" content="本文简要分析MySQL的三层逻辑架构，并介绍各种存储引擎的区别。">
@@ -341,9 +342,53 @@
 <p>第二层架构是MySQL比较有意思的部分。大多数MySQL的核心服务功能都在这一层，包括查询解析，分析，优化，缓存以及所有的内置函数(比如，日期，时间，数学和加密函数)，所有的跨存储引擎的功能都在这一层实现：存储过程，触发器，视图等等。</p>
 <p>第三层包含了存储引擎，存储引擎负责MySQL中数据的存储和提取。和GNU/Linux下的各种文件系统一样，每个存储都有它的优势和劣势。服务器通过API与存储引擎进行通信。这些接口屏蔽了不同存储引擎之间的差异，使得这些差异对上层的查询过程透明。</p>
 <p>存储引擎API包含十几个底层函数，用于执行诸如”开始一个事务”或者”根据主键提取一行记录”等操作，但存储引擎不会取解析SQL，不同存储引擎之间也不会互相通信，而只是响应上层服务器的请求。</p>
-<h3 id="连接管理与安全性"><a href="#连接管理与安全性" class="headerlink" title="连接管理与安全性"></a>连接管理与安全性</h3><p>每个客户端连接都会在服务器进程中拥有一个线程，这个连接查询只会在这个单独的线程中执行，该线程只能轮流在某个CPU核心或者CPU中运行。服务器会负责缓存线程，因此不需要为每一个新建的连接创建或者销毁线程。</p>
+<h2 id="连接管理与授权认证"><a href="#连接管理与授权认证" class="headerlink" title="连接管理与授权认证"></a>连接管理与授权认证</h2><p>每个客户端连接都会在服务器进程中拥有一个线程，这个连接查询只会在这个单独的线程中执行，该线程只能轮流在某个CPU核心或者CPU中运行。服务器会负责缓存线程，因此不需要为每一个新建的连接创建或者销毁线程。</p>
 <p>当客户端连接到MySQL服务器时，服务器需要对其进行认证。认证基于用户名，原始主机信息和密码。如果使用了安全套接字(SSL)的方式连接，还可以使用X.509证书认证。一旦客户端连接成功，服务器会继续验证客户端是否具有执行某个特定查询的权限。</p>
-<h3 id="优化与执行"><a href="#优化与执行" class="headerlink" title="优化与执行"></a>优化与执行</h3><p>MySQL会解析查询，并创建内部数据结构(解析树)，然后对其进行各种优化，包括重写查询，决定表的读取顺序，以及选择合适的索引等。</p>
+<h2 id="优化与执行"><a href="#优化与执行" class="headerlink" title="优化与执行"></a>优化与执行</h2><p>MySQL会解析查询，并创建内部数据结构(解析树)，然后对其进行各种优化，包括重写查询，决定表的读取顺序，以及选择合适的索引等。用户可以通过特殊的关键字提示(hint)优化器，影响它的决策过程。也可以请求优化器解释(explain)优化过程的各个因素，使用户可以知道服务器是如何进行优化决策的，并提供一个参考基准，便于用户重构查询和schema，修改相关配置，使应用尽可能高效的运行。</p>
+<p>优化器并不关心使用的是什么存储引擎，但存储引擎对于优化查询是有影响的。优化器会请求存储引擎提供容量或某个具体操作的开销信息，以及表数据的统计信息。例如，某些存储引擎的某种索引，可能对一些特定的查询有优化。</p>
+<p>对于SELECT语句，在解析查询之前，服务器会先检查查询缓存(Query Cache)，如果能够在其中找到对应的查询，服务器就不必再执行查询解析，优化和执行的整个过程，而是直接返回查询缓存中的结果集。</p>
+<h2 id="MySQL的存储引擎"><a href="#MySQL的存储引擎" class="headerlink" title="MySQL的存储引擎"></a>MySQL的存储引擎</h2><p>在文件系统中，MySQL将每个数据库(也可以称之为schema)保存为数据目录下的一个子目录。创建表时，MySQL会在数据库子目录下创建一个和表同名的.frm文件保存表的定义。例如创建一个名为MyTable的表，MySQL会在MyTable.frm文件中保存该表的定义。因为MySQL使用文件系统的目录和文件来保存数据库和表的定义，大小写敏感性和具体的平台密切相关。不同的存储引擎保存数据和索引的方式是不同的，但表的定义是在服务器层统一处理的。</p>
+<p>可以使用SHOW TABLE STATUS命令来显示表的相关信息。例如，对于mysql数据库中的user表：</p>
+<p><img src="/2018/05/07/mysql-1/./mysql2.png" alt=""></p>
+<p>输出的结果表明这是一个MyISAM表，输出中还有很多其他信息以及统计信息。下面简单介绍一下每一行的含义。</p>
+<ul>
+<li><p><strong>Name</strong>   表名</p>
+</li>
+<li><p><strong>Engine</strong>  表的存储引擎类型。在旧版本中，该列的名字叫Type，而不是Engine</p>
+</li>
+<li><p><strong>Row_format</strong> 行的格式。对于MyISAM表，可选的值为Dynamic，Fixed或Compressed，Dynamic的行长度是可变的，一般包含可变长度的字段，如VARCHAR或BLOB。Fixed的行长度是固定的，只包含固定长度的列，如CHAR和INTEGER。Compressed的行则只在压缩表中存在</p>
+</li>
+<li><p><strong>Rows</strong> 表中的行数。对于MyISAM和其他一些存储引擎，该值是精确的，但对于InnoDB，该值是估计值</p>
+</li>
+<li><p><strong>Avg_row_length</strong> 平均每行包含的字节数</p>
+</li>
+<li><p><strong>Data_length</strong> 表数据的大小(以字节为单位)</p>
+</li>
+<li><p><strong>Max_data_length</strong> 表数据的最大容量，该值和存储引擎有关</p>
+</li>
+<li><p><strong>Index_length</strong> 索引的大小(以字节为单位)</p>
+</li>
+<li><p><strong>Data_free</strong> 对于MyISAM表，表示已分配但目前没有使用的空间，这部分空间包含了之前删除的行，以及后序可以被INSERT利用到的空间</p>
+</li>
+<li><p><strong>Auto_increment</strong> 下一个AUTO_INCREMENT的值</p>
+</li>
+<li><p><strong>Create_time</strong> 表的创建时间</p>
+</li>
+<li><p><strong>Update_time</strong> 表数据的最后修改时间</p>
+</li>
+<li><p><strong>Check_time</strong> 使用CHECK TABLE命令或者myisamchk工具最后一次检查表的时间</p>
+</li>
+<li><p><strong>Collation</strong> 表的默认字符集和字符列排序规则</p>
+</li>
+<li><p><strong>Chechsum</strong> 如果启用，保存的是整个表的实时校验和</p>
+</li>
+<li><p><strong>Create_options</strong> 创建表时指定的其他选项</p>
+</li>
+<li><p><strong>Comment</strong> 该列包含了一些其他额外信息。对于MyISAM表，保存的是表在创建时带的注释。对于InnoDB表，则保存的是InnoDB表空间的剩余信息。如果是一个视图，则该列包含”VIEW”的文本字样。</p>
+</li>
+</ul>
+<h3 id="InnoDB存储引擎"><a href="#InnoDB存储引擎" class="headerlink" title="InnoDB存储引擎"></a>InnoDB存储引擎</h3><p>InnoDB是MyISAM的默认事务型存储引擎，也是最重要的，使用最广泛的存储引擎。它被设计用来处理大量的短期(short-lived)事务，短期事务大部分情况是正常提交的，很少会被回滚。InnoDB的性能和自动依赖崩溃恢复特性，使得它在非事务性存储引擎的需求中也很流行。除非有非常特别的原因需要使用其他的存储引擎，否则应该优先考虑InnoDB引擎。如果要学习存储引擎，InnoDB也是一个非常好的值得花最多时间取深入学习的对象，收益肯定比将时间平均花在每个存储引擎的学习上高的多。</p>
+<h4 id="InnoDB的历史"><a href="#InnoDB的历史" class="headerlink" title="InnoDB的历史"></a>InnoDB的历史</h4><p>InnoDB有着复杂的发布历史，2008年发布了InnoDB plugin，适用于MySQL5.1版本，但是这是Oracle创建的下一代InnoDB引擎，其拥有者是InnoDB而不是MySQL。MySQL默认还是选择集成了旧的InnoDB引擎。当然用户可以自行选择使用新的性能更好，扩展性更佳的InnoDB plugin来覆盖旧的版本。直到最后，在Oracle收购了Sun公司后发布的MySQL5.5中才彻底使用InnoDB plugin替代了旧版本的InooDB，这时InnoDB已经原生编译进MySQL而不是被编译成一个插件。</p>
 
       
     </div>
@@ -361,11 +406,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/数据库底层/" rel="tag"># 数据库底层</a>
+            <a href="/tags/MySQL三层架构/" rel="tag"># MySQL三层架构</a>
           
-            <a href="/tags/并发控制/" rel="tag"># 并发控制</a>
-          
-            <a href="/tags/存储引擎/" rel="tag"># 存储引擎</a>
+            <a href="/tags/存储引擎特性/" rel="tag"># 存储引擎特性</a>
           
         </div>
       
@@ -467,7 +510,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-count">9</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -480,7 +523,7 @@
               
               <div class="site-state-item site-state-tags">
                 
-                  <span class="site-state-item-count">14</span>
+                  <span class="site-state-item-count">19</span>
                   <span class="site-state-item-name">标签</span>
                 
               </div>
@@ -513,7 +556,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#MySQL的基本逻辑架构"><span class="nav-number">1.</span> <span class="nav-text">MySQL的基本逻辑架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#连接管理与安全性"><span class="nav-number">1.1.</span> <span class="nav-text">连接管理与安全性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#优化与执行"><span class="nav-number">1.2.</span> <span class="nav-text">优化与执行</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#MySQL的基本逻辑架构"><span class="nav-number">1.</span> <span class="nav-text">MySQL的基本逻辑架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#连接管理与授权认证"><span class="nav-number">2.</span> <span class="nav-text">连接管理与授权认证</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#优化与执行"><span class="nav-number">3.</span> <span class="nav-text">优化与执行</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MySQL的存储引擎"><span class="nav-number">4.</span> <span class="nav-text">MySQL的存储引擎</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#InnoDB存储引擎"><span class="nav-number">4.1.</span> <span class="nav-text">InnoDB存储引擎</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#InnoDB的历史"><span class="nav-number">4.1.1.</span> <span class="nav-text">InnoDB的历史</span></a></li></ol></li></ol></li></ol></div>
             
 
           </div>

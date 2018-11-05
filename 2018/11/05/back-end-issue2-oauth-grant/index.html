@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="OAuth2.0授权,授权认证规范," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="本文主要介绍oAuth2.0授权认证规范和认证流程，同时介绍其规定的四种认证许可。">
+<meta name="keywords" content="OAuth2.0授权,授权认证规范">
+<meta property="og:type" content="article">
+<meta property="og:title" content="理解OAuth2.0认证">
+<meta property="og:url" content="http://LittleWhiteJing.github.io/2018/11/05/back-end-issue2-oauth-grant/index.html">
+<meta property="og:site_name" content="思想的碎叶">
+<meta property="og:description" content="本文主要介绍oAuth2.0授权认证规范和认证流程，同时介绍其规定的四种认证许可。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://littlewhitejing.github.io/2018/11/05/back-end-issue2-oauth-grant/oauth-grant1.jpeg">
+<meta property="og:image" content="http://littlewhitejing.github.io/2018/11/05/back-end-issue2-oauth-grant/oauth-grant2.jpeg">
+<meta property="og:image" content="http://littlewhitejing.github.io/2018/11/05/back-end-issue2-oauth-grant/oauth-grant3.jpeg">
+<meta property="og:image" content="http://littlewhitejing.github.io/2018/11/05/back-end-issue2-oauth-grant/oauth-grant4.jpeg">
+<meta property="og:image" content="http://littlewhitejing.github.io/2018/11/05/back-end-issue2-oauth-grant/oauth-grant5.jpeg">
+<meta property="og:updated_time" content="2018-11-05T16:45:53.108Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="理解OAuth2.0认证">
+<meta name="twitter:description" content="本文主要介绍oAuth2.0授权认证规范和认证流程，同时介绍其规定的四种认证许可。">
+<meta name="twitter:image" content="http://littlewhitejing.github.io/2018/11/05/back-end-issue2-oauth-grant/oauth-grant1.jpeg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://LittleWhiteJing.github.io/2018/11/05/back-end-issue2-oauth-grant/"/>
+
+
+
+
+
+  <title>理解OAuth2.0认证 | 思想的碎叶</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">思想的碎叶</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://LittleWhiteJing.github.io/2018/11/05/back-end-issue2-oauth-grant/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="littexjing">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="思想的碎叶">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">理解OAuth2.0认证</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-11-05T23:56:16+08:00">
+                2018-11-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>本文主要介绍oAuth2.0授权认证规范和认证流程，同时介绍其规定的四种认证许可。</p>
+<a id="more"></a>
+<h2 id="什么是OAuth协议"><a href="#什么是OAuth协议" class="headerlink" title="什么是OAuth协议"></a>什么是OAuth协议</h2><p>OAuth 协议为用户资源的授权提供了一个安全的、开放而又简易的标准。与以往的授权方式不同之处是 OAuth的授权不会使第三方触及到用户的帐号信息（如用户名与密码），即第三方无需使用用户的用户名与密码就可以申请获得该用户资源的授权，因此 OAuth是安全的。OAuth 是 Open Authorization 的简写。</p>
+<h2 id="OAuth中的四个角色"><a href="#OAuth中的四个角色" class="headerlink" title="OAuth中的四个角色"></a>OAuth中的四个角色</h2><p>1.Resource Owner：资源拥有者，一般指用户</p>
+<p>2.Resource Server：资源服务器，数据中心</p>
+<p>3.Client：第三方应用客户端，请求者</p>
+<p>4.Authorization Server：授权服务器，管理Resource Owner，Client和Resource Server的三角关系的中间层。</p>
+<p>其中Authorization server和Resource server可以是独立的服务提供商，也可以是在一起的，比如腾讯提供QQ空间作为资源服务器的同时也提供授权服务。</p>
+<p>从这里可以看出，OAuth2在解决小明遇到的问题的过程中增加了一个Authorization server的角色。又印证了那句话，在计算机领域的所有问题都可以添加一个中间层来解决。</p>
+<p>OAuth2解决问题的关键在于使用Authorization server提供一个访问凭据给Client，使得Client可以在不知道Resource owner在Resource server上的用户名和密码的情况下消费Resource owner的受保护资源。</p>
+<h2 id="部署OAuth2-0需要完成的工作"><a href="#部署OAuth2-0需要完成的工作" class="headerlink" title="部署OAuth2.0需要完成的工作"></a>部署OAuth2.0需要完成的工作</h2><p>由于OAuth2引入了Authorization server来管理Resource Owner，Client和Resource Server的三角关系，那么想要用上OAuth2，是要实现以下功能的。</p>
+<p>1.增加一个Authorization server，提供授权的实现，一般由Resource server 来提供。</p>
+<p>2.Resource server 为第三方应用程序提供注册接口。</p>
+<p>3.Resource server 开放相应的受保护资源的API。</p>
+<p>4.Client 注册成为Resource server的第三方应用。</p>
+<p>5.Client 消费这些API。</p>
+<p>作为资源服务提供商来说，1，2，3这三件事情是需要完成的。</p>
+<p>作为第三方应用程序，要完成的工作是在4和5这两个步骤中。</p>
+<p>其中作为Resource owner来说，是不用做什么的，是OAuth2受益的千千万万的最终人类用户。</p>
+<h3 id="作为Resource-server"><a href="#作为Resource-server" class="headerlink" title="作为Resource server"></a>作为Resource server</h3><p>在一般情况下，Resource server提供Authorization server服务，主要提供两类接口：</p>
+<p>1.授权接口：接受Client的授权请求，引导用户到Resource server完成登陆授权的过程。</p>
+<p>2.获取访问令牌接口：使用授权接口提供的许可凭据来颁发Resource owner的访问令牌给Client，或者由Client更新过期的访问令牌。</p>
+<p>除此之外，还需要提供一个第三方应用程序注册管理的服务。通常情况下会为注册完成的第三方应用程序分配两个成对出现的重要参数：</p>
+<p>1.client_id：第三方应用程序的一个标识id，这个信息通常是公开的信息，用来区分哪一个第三方应用程序。</p>
+<p>2.client_secret：第三方应用程序的私钥信息，这个信息是私密的信息，不允许在OAuth2流程中传递的，用于安全方面的检测和加密。</p>
+<h3 id="作为Client"><a href="#作为Client" class="headerlink" title="作为Client"></a>作为Client</h3><p>在Client取得client_id和client_secret之后。使用这些信息来发起授权请求、获取access_token请求和消费受保护的资源。</p>
+<h2 id="OAuth2-0授权流程"><a href="#OAuth2-0授权流程" class="headerlink" title="OAuth2.0授权流程"></a>OAuth2.0授权流程</h2><p><img src="/2018/11/05/back-end-issue2-oauth-grant/./oauth-grant1.jpeg" alt=""></p>
+<p>在上述的OAuth认证流程中，（A）-&gt;（B）-&gt;（C）-&gt;（D）是授权的过程，（E）-&gt;（F）是消费资源的过程。</p>
+<p>（A）用户访问第三方应用，第三方应用向资源服务器发起授权请求</p>
+<p>（B）资源服务器接受授权请求，并返回授权许可给第三方应用</p>
+<p>（C）第三方应用使用授权许可向Authorization server发起请求</p>
+<p>（D）Authorization server验证第三方的身份和授权许可，发送访问令牌给第三方应用</p>
+<p>（E）第三方应用用访问令牌请求用户在资源服务器上的资源</p>
+<p>（F）资源服务器根据访问令牌，返回用户的资源信息给第三方应用</p>
+<p>这其中比较重要的一个概念是访问令牌 ，它代表的信息是整个OAuth2的核心，也是ABCD这些步骤最终要得到的信息。</p>
+<p>访问令牌是对应用可以在资源服务器访问哪些用户的哪些信息这个完整权限的一个抽象，访问令牌背后的信息有下面三类</p>
+<p>1.客户端标识</p>
+<p>2.用户标识</p>
+<p>3.客户端能访问资源所有者的哪些资源以及其相应的权限</p>
+<p>有了这三类信息，那么资源服务器（Resouce Server）就可以区分出来是哪个第三方应用（Client）要访问哪个用户（Resource Owner）的哪些资源（以及有没有权限）。</p>
+<h2 id="OAuth的四种授权许可"><a href="#OAuth的四种授权许可" class="headerlink" title="OAuth的四种授权许可"></a>OAuth的四种授权许可</h2><p>上一小节介绍了OAuth2的授权流程，除了访问令牌之外，还有一个重要的概念授权许可（Authorization Grant）。</p>
+<p>书面化的方式解释就是授权许可是一个代表资源所有者授权（访问受保护资源）的凭据，客户端用它来获取访问令牌。</p>
+<p>那么如何获得这个凭据呐，OAuth2定义了四种许可类型以及用于定义其他类型的可扩展性机制：</p>
+<p>1.Authorization Code：授权码；</p>
+<p>2.Implicit：隐式许可；</p>
+<p>3.Resource Owner Password Credentials：资源所有者密码凭据；</p>
+<p>4.Client Credentials ：客户端凭据。</p>
+<p>以下4种授权许可是对上述(4. OAuth2的授权流程)中的ABDE四个阶段的展开。</p>
+<h3 id="Authorization-Code"><a href="#Authorization-Code" class="headerlink" title="Authorization Code"></a>Authorization Code</h3><p>这是OAuth2最常用的一种授权许可类型，比如QQ，微博，Facebook和豆瓣等等。要求Client具有可公开访问的Server服务器来接受Authorization Code，具体的流程如下：</p>
+<p><img src="/2018/11/05/back-end-issue2-oauth-grant/./oauth-grant2.jpeg" alt=""></p>
+<p>上图ABCDE这5个步骤，既是完整的获取访问令牌的一个过程。</p>
+<p>（A）Client使用浏览器（用户代理）访问Authorization server。也就是用浏览器访问一个URL，这个URL是Authorization server提供的，访问的收Client需要提供（客户端标识，请求范围，本地状态和重定向URL）这些参数。</p>
+<p>（B）Authorization server验证Client在（A）中传递的参数信息，如果无误则提供一个页面供Resource owner登陆，登陆成功后选择Client可以访问Resource server的哪些资源以及读写权限。</p>
+<p>（C）在（B）无误后返回一个授权码（Authorization Code）给Client。</p>
+<p>（D）Client拿着（C）中获得的授权码（Authorization Code）和（客户端标识、重定向URL等信息）作为参数，请求Authorization server提供的获取访问令牌的URL。</p>
+<p>（E）Authorization server返回访问令牌和可选的刷新令牌以及令牌有效时间等信息给Client。</p>
+<h4 id="Authorization-Request"><a href="#Authorization-Request" class="headerlink" title="Authorization Request"></a>Authorization Request</h4><p>对应步骤（A），客户端提供以下参数请求Authorization Server：</p>
+<p>1.response_type：必选。值固定为“code”。</p>
+<p>2.client_id：必选。第三方应用的标识ID。</p>
+<p>3.state：推荐。Client提供的一个字符串，服务器会原样返回给Client。</p>
+<p>4.redirect_uri：必选。授权成功后的重定向地址。</p>
+<p>5.scope：可选。表示授权范围。</p>
+<p>比如以下示例</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GET /authorize?response_type=code&amp;client_id=1&amp;state=xyz&amp;redirect_uri=https%3A%2F%2Fclient%2Eexample%2Ecom%2Foauth2&amp;scope=user,photo HTTP/1.1 Host: server.example.com</span><br></pre></td></tr></table></figure>
+<h4 id="Authorization-Response"><a href="#Authorization-Response" class="headerlink" title="Authorization Response"></a>Authorization Response</h4><p>对应步骤（C），Authorization Server会返回如下信息：</p>
+<p>1.code：授权码。</p>
+<p>2.state：步骤（A）中客户端提供的state参数原样返回。</p>
+<p>比如以下示例</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HTTP/1.1 302 Found Location: https://client.example.com/oauth2?code=SplxlOBeZQQYbYS6WxSbIA&amp;state=xyz</span><br></pre></td></tr></table></figure>
+<p>Location头部信息指向步骤（A）提供的redirect_uri地址，同时携带code信息和state信息给client，这样浏览器在重定向的时候就会已GET的方式访问Client提供的redirect_uri，同时Client接收到code信息和state信息。下一步就可以请求access_token了。</p>
+<h4 id="Access-Token-Request"><a href="#Access-Token-Request" class="headerlink" title="Access Token Request"></a>Access Token Request</h4><p>对应步骤（D），客户端提供以下参数请求Authorization Server：</p>
+<p>1.grant_type：必选。固定值“authorization_code”。</p>
+<p>2.code : 必选。Authorization Response 中响应的code。</p>
+<p>3.redirect_uri：必选。必须和Authorization Request中提供的redirect_uri相同。</p>
+<p>4.client_id：必选。必须和Authorization Request中提供的client_id相同。</p>
+<p>比如以下示例</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">POST /token HTTP/1.1 Host: server.example.com Content-Type: application/x-www-form-urlencoded  grant_type=authorization_code&amp;code=123&amp;client_id=1&amp;redirect_uri=https%3A%2F%2Fclient%2Eexample%2Ecom%2Foauth2</span><br></pre></td></tr></table></figure>
+<h4 id="Access-Token-Response"><a href="#Access-Token-Response" class="headerlink" title="Access Token Response"></a>Access Token Response</h4><p>对应步骤（E），Authorization Server会返回如下典型的信息：</p>
+<p>1.access_token：访问令牌。</p>
+<p>2.refresh_token：刷新令牌。</p>
+<p>3.expires_in：过期时间。</p>
+<p>比如以下示例</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HTTP/1.1 200 OK Content-Type: application/json;charset=UTF-8  &#123;    &quot;access_token&quot;:&quot;2YotnFZFEjr1zCsicMWpAA&quot;,    &quot;token_type&quot;:&quot;example&quot;,    &quot;expires_in&quot;:3600,     &quot;refresh_token&quot;:&quot;tGzv3JOkF0XG5Qx2TlKWIA&quot;,     &quot;example_parameter&quot;:&quot;example_value&quot; &#125;</span><br></pre></td></tr></table></figure>
+<h3 id="Implicit"><a href="#Implicit" class="headerlink" title="Implicit"></a>Implicit</h3><p>这个是Authorization Code的简化版本。其中省略掉了颁发授权码（Authorization Code）给客户端的过程，而是直接返回访问令牌和可选的刷新令牌。其适用于没有Server服务器来接受处理Authorization Code的第三方应用，其流程如下:</p>
+<p><img src="/2018/11/05/back-end-issue2-oauth-grant/./oauth-grant3.jpeg" alt=""></p>
+<p>其步骤就不做详细介绍了，相信大家都能理解。和Authorzation Code类型下重要的区分就是省略了Authorization Response和Access Token Request。而是直接由Authorization Request返回Access Token Response信息，具体如下。</p>
+<h4 id="Authorization-Request-1"><a href="#Authorization-Request-1" class="headerlink" title="Authorization Request"></a>Authorization Request</h4><p>客户端提供以下参数请求Authorization Server：</p>
+<p>1.response_type：必选。值固定为“token”。</p>
+<p>2.client_id：必选。第三方应用的标识ID。</p>
+<p>3.state：推荐。Client提供的一个字符串，服务器会原样返回给Client。</p>
+<p>4.redirect_uri：可选。授权成功后的重定向地址。</p>
+<p>5.scope：可选。表示授权范围。</p>
+<p>重点区别在于response_type为“token”，而不再是“code”，redirect_uri也变为了可选参数。</p>
+<p>比如以下示例</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GET /authorize?response_type=token&amp;client_id=1&amp;state=xyz&amp;redirect_uri=https%3A%2F%2Fclient%2Eexample%2Ecom%2Foauth2&amp;scope=user,photo HTTP/1.1 Host: server.example.com</span><br></pre></td></tr></table></figure>
+<h4 id="Access-Token-Response-1"><a href="#Access-Token-Response-1" class="headerlink" title="Access Token Response"></a>Access Token Response</h4><p>Authorization Server会返回如下典型的信息：</p>
+<p>1.access_token：访问令牌。</p>
+<p>2.refresh_token：刷新令牌。</p>
+<p>3.expires_in：过期时间。</p>
+<p>比如以下示：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">HTTP/1.1 302 Found Location: http://client.example.com/oauth2#access_token=2YotnFZFEjr1zCsicMWpAA&amp;state=xyz&amp;expires_in=3600</span><br></pre></td></tr></table></figure>
+<p>注意其和Authorization Code的最大区别在于它是把token信息放在了url的hash部分（#后面），而不是作为参数(?后面)。这样浏览器在访问重定向的Location指定的url时，就不会把这些数据发送到服务器。而Client可以通过读取Location头信息中获取到access_token信息。</p>
+<h3 id="Resource-Owner-Password-Credentials-Grant"><a href="#Resource-Owner-Password-Credentials-Grant" class="headerlink" title="Resource Owner Password Credentials Grant"></a>Resource Owner Password Credentials Grant</h3><p><img src="/2018/11/05/back-end-issue2-oauth-grant/./oauth-grant4.jpeg" alt=""></p>
+<p>这种模式再一步简化，和Authorzation Code类型下重要的区分就是省略了Authorization Request和Authorization Response。而是Client直接使用Resource owner提供的username和password来直接请求access_token（直接发起Access Token Request然后返回Access Token Response信息）。这种模式一般适用于Resource server高度信任第三方Client的情况下。</p>
+<p>客户端提供以下参数请求Authorization Server：</p>
+<p>1.grant_type：必选。值固定为“password”。</p>
+<p>2.username：必选。用户登陆名。</p>
+<p>3.passward：必选。用户登陆密码。</p>
+<p>4.scope：可选。表示授权范围。</p>
+<p>比如以下示例</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">POST /token HTTP/1.1 Host: server.example.com Content-Type: application/x-www-form-urlencoded  grant_type=password&amp;username=blackheart&amp;password=1234</span><br></pre></td></tr></table></figure>
+<p>Access Token Response和Authorization Code一致，就不列出来了。</p>
+<h3 id="Client-Credentials-Grant"><a href="#Client-Credentials-Grant" class="headerlink" title="Client Credentials Grant"></a>Client Credentials Grant</h3><p>这种类型就更简化了，Client直接已自己的名义而不是Resource owner的名义去要求访问Resource server的一些受保护资源。</p>
+<p><img src="/2018/11/05/back-end-issue2-oauth-grant/./oauth-grant5.jpeg" alt=""></p>
+<p>客户端提供以下参数请求Authorization Server：</p>
+<p>1.grant_type：必选。值固定为“client_credentials”。</p>
+<p>2.scope：可选。表示授权范围。</p>
+<p>比如以下示例：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">POST /token HTTP/1.1 Host: server.example.com Content-Type: application/x-www-form-urlencoded  grant_type=client_credentials</span><br></pre></td></tr></table></figure>
+<p>Access Token Response和Authorization Code一致，就不列出来了。</p>
+<p>以微信公众号为例，它提供由这类的OAuth2许可类型，这个场景下得到的access_token的所属人是公众号的，可以用此access_token来获取所有已关注的用户的信息，而不局限于特定的某一个用户，正是Client Credentials Grant这种类型的许可的用武之地。</p>
+<h2 id="OAuth2刷新令牌"><a href="#OAuth2刷新令牌" class="headerlink" title="OAuth2刷新令牌"></a>OAuth2刷新令牌</h2><p>在上述得到访问令牌（access_token）时，一般会提供一个过期时间和刷新令牌。以便在访问令牌过期失效的时候可以由客户端自动获取新的访问令牌，而不是让用户再次登陆授权。那么问题来了，是否可以把过期时间设置的无限大呢，答案是可以的，笔者记得Pocket的OAuth2拿到的访问令牌就是无限期的，好像豆瓣的也是。如下是刷新令牌的收客户端需要提供给Authorization Server的参数：</p>
+<p>1.grant_type：必选。固定值“refresh_token”。</p>
+<p>2.refresh_token：必选。客户端得到access_token的同时拿到的刷新令牌。</p>
+<p>比如以下示例：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">POST /token HTTP/1.1  Host: server.example.com   grant_type=refresh_token&amp;refresh_token=tGzv3JOkF0XG5Qx2TlKWIA</span><br></pre></td></tr></table></figure>
+<p>响应信息和5.1.4 Access Token Response保持一致。</p>
+<h2 id="Token传递方式"><a href="#Token传递方式" class="headerlink" title="Token传递方式"></a>Token传递方式</h2><p>在第三方Client拿到access_token后，如何发送给Resouce Server这个问题并没有在RFC6729种定义，而是作为一个单独的RFC6750来独立定义了。这里做以下简单的介绍，主要有三种方式如下：</p>
+<p>1.URI Query Parameter.</p>
+<p>2.Authorization Request Header Field.</p>
+<p>3.Form-Encoded Body Parameter.</p>
+<h3 id="URI-Query-Parameter"><a href="#URI-Query-Parameter" class="headerlink" title="URI Query Parameter"></a>URI Query Parameter</h3><p>这种使用途径应该是最常见的一种方式，非常简单，比如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">GET /resource?access_token=mF_9.B5f-4.1JqM HTTP/1.1</span><br><span class="line">Host: server.example.com</span><br></pre></td></tr></table></figure>
+<p>在我们请求受保护的资源的Url后面追加一个access_token的参数即可。另外还有一点要求，就是Client需要设置以下Request Header的Cache-Control:no-store，用来阻止access_token不会被Web中间件给log下来，属于安全防护方面的一个考虑。</p>
+<h3 id="Authorization-Request-Header-Field"><a href="#Authorization-Request-Header-Field" class="headerlink" title="Authorization Request Header Field"></a>Authorization Request Header Field</h3><p>因为在HTTP应用层协议中，专门有定义一个授权使用的Request Header，所以也可以使用这种方式：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">GET /resource HTTP/1.1</span><br><span class="line">Host: server.example.com</span><br><span class="line">Authorization: Bearer mF_9.B5f-4.1JqM</span><br></pre></td></tr></table></figure>
+<p>其中”Bearer “是固定的在access_token前面的头部信息。</p>
+<h3 id="Form-Encoded-Body-Parameter"><a href="#Form-Encoded-Body-Parameter" class="headerlink" title="Form-Encoded Body Parameter"></a>Form-Encoded Body Parameter</h3><p>使用Request Body这种方式，有一个额外的要求，就是Request Header的”Content-Type”必须是固定的“application/x-www-form-urlencoded”，此外还有一个限制就是不可以使用GET访问，这个好理解，毕竟GET请求是不能携带Request Body的。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">POST /resource HTTP/1.1</span><br><span class="line">Host: server.example.com</span><br><span class="line">Content-Type: application/x-www-form-urlencoded</span><br><span class="line"></span><br><span class="line">access_token=mF_9.B5f-4.1JqM</span><br></pre></td></tr></table></figure>
+<h2 id="OAuth2的安全问题"><a href="#OAuth2的安全问题" class="headerlink" title="OAuth2的安全问题"></a>OAuth2的安全问题</h2><p>在OAuth2早期的时候爆发过不少相关的安全方面的漏洞，其实仔细分析后会发现大都都是没有严格遵循OAuth2的安全相关的指导造成的，相关的漏洞事件百度以下就有了。</p>
+<p>其实OAuth2在设计之初是已经做了很多安全方面的考虑，并且在RFC6749中加入了一些安全方面的规范指导。比如</p>
+<p>1.要求Authorization server进行有效的Client验证；</p>
+<p>2.client_serect,access_token,refresh_token,code等敏感信息的安全存储（不得泄露给第三方）、传输通道的安全性（TSL的要求）；</p>
+<p>3.维持refresh_token和第三方应用的绑定，刷新失效机制；</p>
+<p>4.维持Authorization Code和第三方应用的绑定，这也是state参数为什么是推荐的一点，以防止CSRF；</p>
+<p>5.保证上述各种令牌信息的不可猜测行，以防止被猜测得到；</p>
+<p>安全无小事，这方面是要靠各方面（开放平台，第三方开发者）共同防范的。如QQ互联的OAuth2 API中，state参数是强制必选的参数，授权接口是基于HTTPS的加密通道等；同时作为第三方开发者在使用消费这些服务的时候也应该遵循其相关的安全规范。</p>
+<h2 id="总结-amp-参考-amp-案例"><a href="#总结-amp-参考-amp-案例" class="headerlink" title="总结&amp;参考&amp;案例"></a>总结&amp;参考&amp;案例</h2><p>OAuth2是一种授权标准框架，用来解决的是第三方服务在无需用户提供账号密度的情况下访问用户的私有资源的一套流程规范。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/OAuth2-0授权/" rel="tag"># OAuth2.0授权</a>
+          
+            <a href="/tags/授权认证规范/" rel="tag"># 授权认证规范</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/11/04/back-end-issue1-service-robust/" rel="next" title="如何健壮你的后端服务">
+                <i class="fa fa-chevron-left"></i> 如何健壮你的后端服务
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">littexjing</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#什么是OAuth协议"><span class="nav-number">1.</span> <span class="nav-text">什么是OAuth协议</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OAuth中的四个角色"><span class="nav-number">2.</span> <span class="nav-text">OAuth中的四个角色</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#部署OAuth2-0需要完成的工作"><span class="nav-number">3.</span> <span class="nav-text">部署OAuth2.0需要完成的工作</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#作为Resource-server"><span class="nav-number">3.1.</span> <span class="nav-text">作为Resource server</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#作为Client"><span class="nav-number">3.2.</span> <span class="nav-text">作为Client</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OAuth2-0授权流程"><span class="nav-number">4.</span> <span class="nav-text">OAuth2.0授权流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OAuth的四种授权许可"><span class="nav-number">5.</span> <span class="nav-text">OAuth的四种授权许可</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Authorization-Code"><span class="nav-number">5.1.</span> <span class="nav-text">Authorization Code</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Authorization-Request"><span class="nav-number">5.1.1.</span> <span class="nav-text">Authorization Request</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Authorization-Response"><span class="nav-number">5.1.2.</span> <span class="nav-text">Authorization Response</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Access-Token-Request"><span class="nav-number">5.1.3.</span> <span class="nav-text">Access Token Request</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Access-Token-Response"><span class="nav-number">5.1.4.</span> <span class="nav-text">Access Token Response</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Implicit"><span class="nav-number">5.2.</span> <span class="nav-text">Implicit</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Authorization-Request-1"><span class="nav-number">5.2.1.</span> <span class="nav-text">Authorization Request</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Access-Token-Response-1"><span class="nav-number">5.2.2.</span> <span class="nav-text">Access Token Response</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Resource-Owner-Password-Credentials-Grant"><span class="nav-number">5.3.</span> <span class="nav-text">Resource Owner Password Credentials Grant</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Client-Credentials-Grant"><span class="nav-number">5.4.</span> <span class="nav-text">Client Credentials Grant</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OAuth2刷新令牌"><span class="nav-number">6.</span> <span class="nav-text">OAuth2刷新令牌</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Token传递方式"><span class="nav-number">7.</span> <span class="nav-text">Token传递方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#URI-Query-Parameter"><span class="nav-number">7.1.</span> <span class="nav-text">URI Query Parameter</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Authorization-Request-Header-Field"><span class="nav-number">7.2.</span> <span class="nav-text">Authorization Request Header Field</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Form-Encoded-Body-Parameter"><span class="nav-number">7.3.</span> <span class="nav-text">Form-Encoded Body Parameter</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OAuth2的安全问题"><span class="nav-number">8.</span> <span class="nav-text">OAuth2的安全问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结-amp-参考-amp-案例"><span class="nav-number">9.</span> <span class="nav-text">总结&amp;参考&amp;案例</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">littexjing</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

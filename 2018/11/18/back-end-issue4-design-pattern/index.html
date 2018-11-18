@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="设计模式概述,常见设计模式," />
 
 
 
@@ -79,13 +79,18 @@
 
 
 
-<meta property="og:type" content="website">
-<meta property="og:title" content="思想的碎叶">
-<meta property="og:url" content="http://LittleWhiteJing.github.io/page/2/index.html">
+<meta name="description" content="在软件工程中，设计模式(Design Pattern)是对软件设计中普遍存在（反复出现）的各种问题，所提出的解决方案。">
+<meta name="keywords" content="设计模式概述,常见设计模式">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PHP设计模式概述及设计模式大全">
+<meta property="og:url" content="http://LittleWhiteJing.github.io/2018/11/18/back-end-issue4-design-pattern/index.html">
 <meta property="og:site_name" content="思想的碎叶">
+<meta property="og:description" content="在软件工程中，设计模式(Design Pattern)是对软件设计中普遍存在（反复出现）的各种问题，所提出的解决方案。">
 <meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-11-18T15:26:53.309Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="思想的碎叶">
+<meta name="twitter:title" content="PHP设计模式概述及设计模式大全">
+<meta name="twitter:description" content="在软件工程中，设计模式(Design Pattern)是对软件设计中普遍存在（反复出现）的各种问题，所提出的解决方案。">
 
 
 
@@ -115,13 +120,13 @@
 
 
 
-  <link rel="canonical" href="http://LittleWhiteJing.github.io/page/2/"/>
+  <link rel="canonical" href="http://LittleWhiteJing.github.io/2018/11/18/back-end-issue4-design-pattern/"/>
 
 
 
 
 
-  <title>思想的碎叶</title>
+  <title>PHP设计模式概述及设计模式大全 | 思想的碎叶</title>
   
 
 
@@ -140,8 +145,7 @@
     
   
 
-  <div class="container sidebar-position-left 
-  page-home">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -244,9 +248,9 @@
         <div class="content-wrap">
           <div id="content" class="content">
             
-  <section id="posts" class="posts-expand">
+
+  <div id="posts" class="posts-expand">
     
-      
 
   
 
@@ -259,7 +263,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://LittleWhiteJing.github.io/2018/05/07/mysql-1/">
+    <link itemprop="mainEntityOfPage" href="http://LittleWhiteJing.github.io/2018/11/18/back-end-issue4-design-pattern/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="littexjing">
@@ -276,9 +280,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/05/07/mysql-1/" itemprop="url">MySQL基本架构浅析</a></h1>
+          <h1 class="post-title" itemprop="name headline">PHP设计模式概述及设计模式大全</h1>
         
 
         <div class="post-meta">
@@ -290,8 +292,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-07T22:34:21+08:00">
-                2018-05-07
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-11-18T22:48:49+08:00">
+                2018-11-18
               </time>
             
 
@@ -328,16 +330,38 @@
       
 
       
-        
-          <p>本文简要分析MySQL的三层逻辑架构，并介绍各种存储引擎的区别。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2018/05/07/mysql-1/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
+        <p>在软件工程中，设计模式(Design Pattern)是对软件设计中普遍存在（反复出现）的各种问题，所提出的解决方案。</p>
+<a id="more"></a>
+<h2 id="设计模式概述"><a href="#设计模式概述" class="headerlink" title="设计模式概述"></a>设计模式概述</h2><p>在软件工程中，设计模式（Design Pattern）是对软件设计中普遍存在（反复出现）的各种问题，所提出的解决方案。这个术语是由埃里希·伽玛（Erich Gamma）等人在1990年代从建筑设计领域引入到计算机科学的。</p>
+<p>设计模式并不直接用来完成代码的编写，而是描述在各种不同情况下，要怎么解决问题的一种方案。面向对象设计模式通常以类或对象来描述其中的关系和相互作用，但不涉及用来完成应用程序的特定类或对象。设计模式能使不稳定依赖于相对稳定、具体依赖于相对抽象，避免会引起麻烦的紧耦合，以增强软件设计面对并适应变化的能力。</p>
+<p>并非所有的软件模式都是设计模式，设计模式特指软件“设计”层次上的问题。还有其它非设计模式的模式，如架构模式。同时，算法不能算是一种设计模式，因为算法主要是用来解决计算上的问题，而非设计上的问题。</p>
+<p>本系列是常见设计模式的集合以及如何在 PHP 中实现这些设计模式，并为每种模式提供了相应的示例代码。</p>
+<p>很多人都知道设计模式，但并非都了解如何在具体应用中实现，基于此我们推出了这一系列教程。</p>
+<h2 id="常见设计模式大全"><a href="#常见设计模式大全" class="headerlink" title="常见设计模式大全"></a>常见设计模式大全</h2><p>设计模式可以按照结构被分为三种不同的类型</p>
+<h3 id="创建型"><a href="#创建型" class="headerlink" title="创建型"></a>创建型</h3><p>在软件工程中，创建型设计模式用于处理对象的实例化：</p>
+<ul>
+<li><p><a href="../back-end-issue5-simple-factory">简单工厂模式</a>（Simple Factory）</p>
+</li>
+<li><p><a href="./back-end-issue6-factory-method">工厂方法模式</a>（Factory Method）</p>
+</li>
+<li><p><a href="./back-end-issue7-abstract-factory">抽象工厂模式</a>（Abstract Factory）</p>
+</li>
+<li><p><a href="./back-end-issue8-static-factory">静态工厂模式</a>（Static Factory）</p>
+</li>
+<li><p><a href="./back-end-issue9-builder">建造者模式</a>（Builder）</p>
+</li>
+<li><p><a href="./back-end-issue10-singleton">单例模式</a>（Singleton）</p>
+</li>
+<li><p><a href="./back-end-issue11-multiton">多例模式</a>（Multiton）</p>
+</li>
+<li><p><a href="./back-end-issue12-pool">对象池模式</a>（Pool）</p>
+</li>
+<li><p><a href="./back-end-issue13-prototype">原型模式</a>（Prototype）</p>
+</li>
+</ul>
+<h3 id="结构型"><a href="#结构型" class="headerlink" title="结构型"></a>结构型</h3><p>结构型设计模式用于处理类和对象的组合：</p>
+<h3 id="行为型"><a href="#行为型" class="headerlink" title="行为型"></a>行为型</h3><p>行为型设计模式用于处理类的对象间通信：</p>
+
       
     </div>
     
@@ -352,262 +376,42 @@
 
     <footer class="post-footer">
       
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://LittleWhiteJing.github.io/2018/04/24/apache-1/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="littexjing">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="思想的碎叶">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/04/24/apache-1/" itemprop="url">Apache运行机制剖析</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-24T16:36:51+08:00">
-                2018-04-24
-              </time>
-            
-
-            
-
-            
-          </span>
-
+        <div class="post-tags">
           
-
+            <a href="/tags/设计模式概述/" rel="tag"># 设计模式概述</a>
           
-            
+            <a href="/tags/常见设计模式/" rel="tag"># 常见设计模式</a>
           
-
-          
-          
-
-          
-
-          
-
-          
-
         </div>
-      </header>
-    
+      
 
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
+      
       
       
 
       
-        
-          <p>本文主要从架构和底层实现的角度剖析Apache的运行机制和优化方法。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2018/04/24/apache-1/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/11/18/back-end-issue3-php-trail/" rel="next" title="PHP代码复用特性之Traits">
+                <i class="fa fa-chevron-left"></i> PHP代码复用特性之Traits
+              </a>
+            
           </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
 
-    
+          <span class="post-nav-divider"></span>
 
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://LittleWhiteJing.github.io/2018/04/24/os-1/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="littexjing">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="思想的碎叶">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/04/24/os-1/" itemprop="url">IO多路复用详解</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
+          <div class="post-nav-prev post-nav-item">
             
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-24T15:10:38+08:00">
-                2018-04-24
-              </time>
+              <a href="/2018/11/18/back-end-issue5-simple-factory/" rel="prev" title="[设计模式]简单工厂模式">
+                [设计模式]简单工厂模式 <i class="fa fa-chevron-right"></i>
+              </a>
             
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
+          </div>
         </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
       
 
       
-        
-          <p>本文主要分析比较select，poll，epoll三种IO多路复用机制的底层实现原理。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2018/04/24/os-1/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
       
     </footer>
   </div>
@@ -617,138 +421,11 @@
   </article>
 
 
-    
-      
 
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://LittleWhiteJing.github.io/2018/04/23/nginx-1/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="littexjing">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="思想的碎叶">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/04/23/nginx-1/" itemprop="url">Nginx工作原理分析</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-23T22:46:08+08:00">
-                2018-04-23
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>本文从Nginx的模块，进程模型，事件模型等入手，剖析Nginx的工作原理。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2018/04/23/nginx-1/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
+    <div class="post-spread">
       
     </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
   </div>
-  
-  
-  
-  </article>
-
-
-    
-  </section>
-
-  
-  <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span>
-  </nav>
-
 
 
           </div>
@@ -756,6 +433,10 @@
 
 
           
+
+  
+
+
 
         </div>
         
@@ -776,8 +457,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -828,6 +518,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#设计模式概述"><span class="nav-number">1.</span> <span class="nav-text">设计模式概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#常见设计模式大全"><span class="nav-number">2.</span> <span class="nav-text">常见设计模式大全</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#创建型"><span class="nav-number">2.1.</span> <span class="nav-text">创建型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#结构型"><span class="nav-number">2.2.</span> <span class="nav-text">结构型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#行为型"><span class="nav-number">2.3.</span> <span class="nav-text">行为型</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
@@ -961,6 +667,10 @@
   
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
 
   
 

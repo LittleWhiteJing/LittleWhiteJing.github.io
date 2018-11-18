@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="PHP语言特性,代码复用机制," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Traits是一种为类似PHP的单继承语言而准备的代码复用机制，使用这种机制可以使开发人员在不同的层次结构中复用方法集。">
+<meta name="keywords" content="PHP语言特性,代码复用机制">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PHP代码复用特性之Traits">
+<meta property="og:url" content="http://LittleWhiteJing.github.io/2018/11/18/back-end-issue3-php-trail/index.html">
+<meta property="og:site_name" content="思想的碎叶">
+<meta property="og:description" content="Traits是一种为类似PHP的单继承语言而准备的代码复用机制，使用这种机制可以使开发人员在不同的层次结构中复用方法集。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-11-18T05:17:17.529Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="PHP代码复用特性之Traits">
+<meta name="twitter:description" content="Traits是一种为类似PHP的单继承语言而准备的代码复用机制，使用这种机制可以使开发人员在不同的层次结构中复用方法集。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://LittleWhiteJing.github.io/2018/11/18/back-end-issue3-php-trail/"/>
+
+
+
+
+
+  <title>PHP代码复用特性之Traits | 思想的碎叶</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">思想的碎叶</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://LittleWhiteJing.github.io/2018/11/18/back-end-issue3-php-trail/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="littexjing">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="思想的碎叶">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">PHP代码复用特性之Traits</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-11-18T12:35:57+08:00">
+                2018-11-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Traits是一种为类似PHP的单继承语言而准备的代码复用机制，使用这种机制可以使开发人员在不同的层次结构中复用方法集。</p>
+<a id="more"></a>
+<h2 id="什么是Trait"><a href="#什么是Trait" class="headerlink" title="什么是Trait"></a>什么是Trait</h2><p>自 PHP5.4.0 起，PHP 实现了代码复用的一个方法，称为 trait。</p>
+<p>Trait 是一种为类似 PHP 的单继承语言而准备的代码复用机制。Trait 为了减少单继承语言的限制，使开发人员能够自由地在不同层次结构内独立的类中复用方法集。Traits 和类组合的语义是定义了一种方式来减少复杂性，避免传统多继承和混入类（Mixin）相关的典型问题。</p>
+<p>Trait 和一个类相似，但仅仅旨在用细粒度和一致的方式来组合功能。Trait 不能通过它自身来实例化。它为传统继承增加了水平特性的组合；也就是说，应用类的成员不需要继承。</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">trait</span> ezcReflectionReturnInfo &#123;</span><br><span class="line">  <span class="function"><span class="keyword">function</span> <span class="title">getReturnType</span><span class="params">()</span> </span>&#123; <span class="comment">/*1*/</span> &#125;</span><br><span class="line">  <span class="function"><span class="keyword">function</span> <span class="title">getReturnDescription</span><span class="params">()</span> </span>&#123; <span class="comment">/*2*/</span> &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ezcReflectionMethod</span> <span class="keyword">extends</span> <span class="title">ReflectionMethod</span> </span>&#123;</span><br><span class="line">  <span class="keyword">use</span> <span class="title">ezcReflectionReturnInfo</span>;</span><br><span class="line">  <span class="comment">/* ... */</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ezcReflectionFunction</span> <span class="keyword">extends</span> <span class="title">ReflectionFunction</span> </span>&#123;</span><br><span class="line">  <span class="keyword">use</span> <span class="title">ezcReflectionReturnInfo</span>;</span><br><span class="line">  <span class="comment">/* ... */</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+<h2 id="优先级"><a href="#优先级" class="headerlink" title="优先级"></a>优先级</h2><p>从基类继承的成员被 trait 插入的成员所覆盖。优先顺序是来自当前类的成员覆盖了 trait 的方法，而 trait 则覆盖了被继承的方法。</p>
+<h3 id="优先级顺序示例"><a href="#优先级顺序示例" class="headerlink" title="优先级顺序示例"></a>优先级顺序示例</h3><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Base</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">sayHello</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">'Hello '</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">trait</span> SayWorld &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">sayHello</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">parent</span>::sayHello();</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">'World!'</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyHelloWorld</span> <span class="keyword">extends</span> <span class="title">Base</span> </span>&#123;</span><br><span class="line">    <span class="keyword">use</span> <span class="title">SayWorld</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">$o = <span class="keyword">new</span> MyHelloWorld();</span><br><span class="line">$o-&gt;sayHello();</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+<p>以上例程会输出：Hello World!</p>
+<p>从基类继承的成员被插入的 SayWorld Trait 中的 sayHello 方法所覆盖。其行为 MyHelloWorld 类中定义的方法一致。优先顺序是当前类中的方法会覆盖 trait 方法，而 trait 方法又覆盖了基类中的方法。</p>
+<h3 id="另一个优先级顺序的例子"><a href="#另一个优先级顺序的例子" class="headerlink" title="另一个优先级顺序的例子"></a>另一个优先级顺序的例子</h3><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">trait</span> HelloWorld &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">sayHello</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">'Hello World!'</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TheWorldIsNotEnough</span> </span>&#123;</span><br><span class="line">    <span class="keyword">use</span> <span class="title">HelloWorld</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">sayHello</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">'Hello Universe!'</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">$o = <span class="keyword">new</span> TheWorldIsNotEnough();</span><br><span class="line">$o-&gt;sayHello();</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+<p>以上例程会输出：Hello Universe!</p>
+<h2 id="多个trait"><a href="#多个trait" class="headerlink" title="多个trait"></a>多个trait</h2><p>通过逗号分隔，在use声明列出多个trait，可以都插入到一个类中。</p>
+<h3 id="多个trait的用法例子"><a href="#多个trait的用法例子" class="headerlink" title="多个trait的用法例子"></a>多个trait的用法例子</h3><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">trait</span> Hello &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">sayHello</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">'Hello '</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">trait</span> World &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">sayWorld</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">'World'</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyHelloWorld</span> </span>&#123;</span><br><span class="line">    <span class="keyword">use</span> <span class="title">Hello</span>, <span class="title">World</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">sayExclamationMark</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">'!'</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">$o = <span class="keyword">new</span> MyHelloWorld();</span><br><span class="line">$o-&gt;sayHello();</span><br><span class="line">$o-&gt;sayWorld();</span><br><span class="line">$o-&gt;sayExclamationMark();</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+<p>以上例程会输出：Hello World!</p>
+<h2 id="冲突的解决"><a href="#冲突的解决" class="headerlink" title="冲突的解决"></a>冲突的解决</h2><p>如果两个 trait 都插入了一个同名的方法，如果没有明确解决冲突将会产生一个致命错误。</p>
+<p>为了解决多个 trait 在同一个类中的命名冲突，需要使用 insteadof 操作符来明确指定使用冲突方法中的哪一个。</p>
+<p>以上方式仅允许排除掉其它方法，as 操作符可以将其中一个冲突的方法以另一个名称来引入。</p>
+<h3 id="冲突解决的例子"><a href="#冲突解决的例子" class="headerlink" title="冲突解决的例子"></a>冲突解决的例子</h3><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">trait</span> A &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">smallTalk</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">'a'</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">bigTalk</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">'A'</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">trait</span> B &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">smallTalk</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">'b'</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">bigTalk</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">'B'</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Talker</span> </span>&#123;</span><br><span class="line">    <span class="keyword">use</span> <span class="title">A</span>, <span class="title">B</span> &#123;</span><br><span class="line">        <span class="title">B</span>::<span class="title">smallTalk</span> <span class="title">insteadof</span> <span class="title">A</span>;</span><br><span class="line">        A::bigTalk <span class="keyword">insteadof</span> B;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Aliased_Talker</span> </span>&#123;</span><br><span class="line">    <span class="keyword">use</span> <span class="title">A</span>, <span class="title">B</span> &#123;</span><br><span class="line">        <span class="title">B</span>::<span class="title">smallTalk</span> <span class="title">insteadof</span> <span class="title">A</span>;</span><br><span class="line">        A::bigTalk <span class="keyword">insteadof</span> B;</span><br><span class="line">        B::bigTalk <span class="keyword">as</span> talk;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+<p>在本例中 Talker 使用了 trait A 和 B。由于 A 和 B 有冲突的方法，其定义了使用 trait B 中的 smallTalk 以及 trait A 中的 bigTalk。</p>
+<p>Aliased_Talker 使用了 as 操作符来定义了 talk 来作为 B 的 bigTalk 的别名。</p>
+<h2 id="修改方法的访问控制"><a href="#修改方法的访问控制" class="headerlink" title="修改方法的访问控制"></a>修改方法的访问控制</h2><p>使用 as 语法还可以用来调整方法的访问控制。</p>
+<h3 id="修改方法的访问控制的例子"><a href="#修改方法的访问控制的例子" class="headerlink" title="修改方法的访问控制的例子"></a>修改方法的访问控制的例子</h3><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">trait</span> HelloWorld &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">sayHello</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">'Hello World!'</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 修改 sayHello 的访问控制</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyClass1</span> </span>&#123;</span><br><span class="line">    <span class="keyword">use</span> <span class="title">HelloWorld</span> &#123; <span class="title">sayHello</span> <span class="title">as</span> <span class="title">protected</span>; &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 给方法一个改变了访问控制的别名</span></span><br><span class="line"><span class="comment">// 原版 sayHello 的访问控制则没有发生变化</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyClass2</span> </span>&#123;</span><br><span class="line">    <span class="keyword">use</span> <span class="title">HelloWorld</span> &#123; <span class="title">sayHello</span> <span class="title">as</span> <span class="title">private</span> <span class="title">myPrivateHello</span>; &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+<h2 id="从trait来组成trait"><a href="#从trait来组成trait" class="headerlink" title="从trait来组成trait"></a>从trait来组成trait</h2><p>正如类能够使用 trait 一样，其它 trait 也能够使用 trait。在 trait 定义时通过使用一个或多个 trait，它能够组合其它 trait 中的部分或全部成员。</p>
+<h3 id="从trait组成trait的例子"><a href="#从trait组成trait的例子" class="headerlink" title="从trait组成trait的例子"></a>从trait组成trait的例子</h3><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">trait</span> Hello &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">sayHello</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">'Hello '</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">trait</span> World &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">sayWorld</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">'World!'</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">trait</span> HelloWorld &#123;</span><br><span class="line">    <span class="keyword">use</span> <span class="title">Hello</span>, <span class="title">World</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyHelloWorld</span> </span>&#123;</span><br><span class="line">    <span class="keyword">use</span> <span class="title">HelloWorld</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">$o = <span class="keyword">new</span> MyHelloWorld();</span><br><span class="line">$o-&gt;sayHello();</span><br><span class="line">$o-&gt;sayWorld();</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+<p>以上例程会输出：Hello World!</p>
+<h2 id="Trait的抽象成员"><a href="#Trait的抽象成员" class="headerlink" title="Trait的抽象成员"></a>Trait的抽象成员</h2><p>为了对使用的类施加强制要求，trait 支持抽象方法的使用。</p>
+<h3 id="通过抽象方法来进行强制要求的例子"><a href="#通过抽象方法来进行强制要求的例子" class="headerlink" title="通过抽象方法来进行强制要求的例子"></a>通过抽象方法来进行强制要求的例子</h3><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">trait</span> Hello &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">sayHelloWorld</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">'Hello'</span>.<span class="keyword">$this</span>-&gt;getWorld();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">abstract</span> <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">getWorld</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyHelloWorld</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> $world;</span><br><span class="line">    <span class="keyword">use</span> <span class="title">Hello</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">getWorld</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">$this</span>-&gt;world;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">setWorld</span><span class="params">($val)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;world = $val;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+<h2 id="Trait的静态成员"><a href="#Trait的静态成员" class="headerlink" title="Trait的静态成员"></a>Trait的静态成员</h2><p>Trait可以被静态成员静态方法定义。</p>
+<h3 id="静态变量的例子"><a href="#静态变量的例子" class="headerlink" title="静态变量的例子"></a>静态变量的例子</h3><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">trait</span> Counter &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">inc</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">static</span> $c = <span class="number">0</span>;</span><br><span class="line">        $c = $c + <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">"$c\n"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">C1</span> </span>&#123;</span><br><span class="line">    <span class="keyword">use</span> <span class="title">Counter</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">C2</span> </span>&#123;</span><br><span class="line">    <span class="keyword">use</span> <span class="title">Counter</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">$o = <span class="keyword">new</span> C1(); $o-&gt;inc(); <span class="comment">// echo 1</span></span><br><span class="line">$p = <span class="keyword">new</span> C2(); $p-&gt;inc(); <span class="comment">// echo 1</span></span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="静态方法的例子"><a href="#静态方法的例子" class="headerlink" title="静态方法的例子"></a>静态方法的例子</h3><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">trait</span> StaticExample &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="function"><span class="keyword">function</span> <span class="title">doSomething</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">'Doing something'</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Example</span> </span>&#123;</span><br><span class="line">    <span class="keyword">use</span> <span class="title">StaticExample</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">Example::doSomething();</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="静态变量和静态方法的例子"><a href="#静态变量和静态方法的例子" class="headerlink" title="静态变量和静态方法的例子"></a>静态变量和静态方法的例子</h3><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">trait</span> Counter &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> $c = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="function"><span class="keyword">function</span> <span class="title">inc</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">self</span>::$c = <span class="keyword">self</span>::$c + <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">echo</span> <span class="keyword">self</span>::$c . <span class="string">"\n"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">C1</span> </span>&#123;</span><br><span class="line">    <span class="keyword">use</span> <span class="title">Counter</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">C2</span> </span>&#123;</span><br><span class="line">    <span class="keyword">use</span> <span class="title">Counter</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">C1::inc(); <span class="comment">// echo 1</span></span><br><span class="line">C2::inc(); <span class="comment">// echo 1</span></span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+<h2 id="属性"><a href="#属性" class="headerlink" title="属性"></a>属性</h2><p>Trait同样可以定义属性</p>
+<h3 id="定义属性的例子"><a href="#定义属性的例子" class="headerlink" title="定义属性的例子"></a>定义属性的例子</h3><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">trait</span> PropertiesTrait &#123;</span><br><span class="line">    <span class="keyword">public</span> $x = <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">PropertiesExample</span> </span>&#123;</span><br><span class="line">    <span class="keyword">use</span> <span class="title">PropertiesTrait</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">$example = <span class="keyword">new</span> PropertiesExample;</span><br><span class="line">$example-&gt;x;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+<p>如果 trait 定义了一个属性，那类将不能定义同样名称的属性，否则会产生一个错误。如果该属性在类中定义与在 trait 中定义的兼容（同样的可见性和初始值）则错误的级别是 E_STRICT，否则是一个致命错误。</p>
+<h3 id="冲突的例子"><a href="#冲突的例子" class="headerlink" title="冲突的例子"></a>冲突的例子</h3><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">trait</span> PropertiesTrait &#123;</span><br><span class="line">    <span class="keyword">public</span> $same = <span class="keyword">true</span>;</span><br><span class="line">    <span class="keyword">public</span> $different = <span class="keyword">false</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">PropertiesExample</span> </span>&#123;</span><br><span class="line">    <span class="keyword">use</span> <span class="title">PropertiesTrait</span>;</span><br><span class="line">    <span class="keyword">public</span> $same = <span class="keyword">true</span>; <span class="comment">// Strict Standards</span></span><br><span class="line">    <span class="keyword">public</span> $different = <span class="keyword">true</span>; <span class="comment">// 致命错误</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+<h2 id="use的不同"><a href="#use的不同" class="headerlink" title="use的不同"></a>use的不同</h2><h3 id="不同use的例子"><a href="#不同use的例子" class="headerlink" title="不同use的例子"></a>不同use的例子</h3><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">namespace</span> <span class="title">Foo</span>\<span class="title">Bar</span>;</span><br><span class="line"><span class="keyword">use</span> <span class="title">Foo</span>\<span class="title">Test</span>;  <span class="comment">// means \Foo\Test - the initial \ is optional</span></span><br><span class="line"><span class="meta">?&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">namespace</span> <span class="title">Foo</span>\<span class="title">Bar</span>;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SomeClass</span> </span>&#123;</span><br><span class="line">    <span class="keyword">use</span> <span class="title">Foo</span>\<span class="title">Test</span>;   <span class="comment">// means \Foo\Bar\Foo\Test</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+<p>第一个use是用于 namespace 的 use Foo\Test，找到的是 \Foo\Test，第二个 use 是使用一个trait，找到的是\Foo\Bar\Foo\Test。</p>
+<h2 id="CLASS-和-TRAIT"><a href="#CLASS-和-TRAIT" class="headerlink" title="__CLASS__和__TRAIT__"></a><code>__CLASS__和__TRAIT__</code></h2><p><code>__CLASS__</code> 返回 use trait 的 class name，<code>__TRAIT__</code>返回 trait name</p>
+<p>示例如下：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">trait</span> TestTrait &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">testMethod</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">"Class: "</span> . <span class="keyword">__CLASS__</span> . PHP_EOL;</span><br><span class="line">        <span class="keyword">echo</span> <span class="string">"Trait: "</span> . __TRAIT__ . PHP_EOL;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">BaseClass</span> </span>&#123;</span><br><span class="line">    <span class="keyword">use</span> <span class="title">TestTrait</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TestClass</span> <span class="keyword">extends</span> <span class="title">BaseClass</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">$t = <span class="keyword">new</span> TestClass();</span><br><span class="line">$t-&gt;testMethod();</span><br><span class="line"></span><br><span class="line"><span class="comment">//Class: BaseClass</span></span><br><span class="line"><span class="comment">//Trait: TestTrait</span></span><br></pre></td></tr></table></figure>
+<h2 id="Trait单例"><a href="#Trait单例" class="headerlink" title="Trait单例"></a>Trait单例</h2><p>示例如下：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">trait</span> singleton &#123;    </span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * private construct, generally defined by using class</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="comment">//private function __construct() &#123;&#125;</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="function"><span class="keyword">function</span> <span class="title">getInstance</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">static</span> $_instance = <span class="keyword">NULL</span>;</span><br><span class="line">        $class = <span class="keyword">__CLASS__</span>;</span><br><span class="line">        <span class="keyword">return</span> $_instance ?: $_instance = <span class="keyword">new</span> $class;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__clone</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        trigger_error(<span class="string">'Cloning '</span>.<span class="keyword">__CLASS__</span>.<span class="string">' is not allowed.'</span>,E_USER_ERROR);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__wakeup</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        trigger_error(<span class="string">'Unserializing '</span>.<span class="keyword">__CLASS__</span>.<span class="string">' is not allowed.'</span>,E_USER_ERROR);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* Example Usage</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">foo</span> </span>&#123;</span><br><span class="line">    <span class="keyword">use</span> <span class="title">singleton</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;name = <span class="string">'foo'</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">bar</span> </span>&#123;</span><br><span class="line">    <span class="keyword">use</span> <span class="title">singleton</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">$this</span>-&gt;name = <span class="string">'bar'</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">$foo = foo::getInstance();</span><br><span class="line"><span class="keyword">echo</span> $foo-&gt;name;</span><br><span class="line"></span><br><span class="line">$bar = bar::getInstance();</span><br><span class="line"><span class="keyword">echo</span> $bar-&gt;name;</span><br></pre></td></tr></table></figure>
+<h2 id="调用trait方法"><a href="#调用trait方法" class="headerlink" title="调用trait方法"></a>调用trait方法</h2><p>虽然不很明显，但是如果Trait的方法可以被定义为在普通类的静态方法，就可以被调用</p>
+<p>实例如下</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">trait</span> Foo &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="function"><span class="keyword">function</span> <span class="title">bar</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">'baz'</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">echo</span> Foo::bar(),<span class="string">"\\n"</span>;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/PHP语言特性/" rel="tag"># PHP语言特性</a>
+          
+            <a href="/tags/代码复用机制/" rel="tag"># 代码复用机制</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/11/05/back-end-issue2-oauth-grant/" rel="next" title="理解OAuth2.0认证">
+                <i class="fa fa-chevron-left"></i> 理解OAuth2.0认证
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">littexjing</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">25</span>
+                  <span class="site-state-item-name">标签</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#什么是Trait"><span class="nav-number">1.</span> <span class="nav-text">什么是Trait</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#优先级"><span class="nav-number">2.</span> <span class="nav-text">优先级</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#优先级顺序示例"><span class="nav-number">2.1.</span> <span class="nav-text">优先级顺序示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#另一个优先级顺序的例子"><span class="nav-number">2.2.</span> <span class="nav-text">另一个优先级顺序的例子</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#多个trait"><span class="nav-number">3.</span> <span class="nav-text">多个trait</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#多个trait的用法例子"><span class="nav-number">3.1.</span> <span class="nav-text">多个trait的用法例子</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#冲突的解决"><span class="nav-number">4.</span> <span class="nav-text">冲突的解决</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#冲突解决的例子"><span class="nav-number">4.1.</span> <span class="nav-text">冲突解决的例子</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#修改方法的访问控制"><span class="nav-number">5.</span> <span class="nav-text">修改方法的访问控制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#修改方法的访问控制的例子"><span class="nav-number">5.1.</span> <span class="nav-text">修改方法的访问控制的例子</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#从trait来组成trait"><span class="nav-number">6.</span> <span class="nav-text">从trait来组成trait</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#从trait组成trait的例子"><span class="nav-number">6.1.</span> <span class="nav-text">从trait组成trait的例子</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Trait的抽象成员"><span class="nav-number">7.</span> <span class="nav-text">Trait的抽象成员</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#通过抽象方法来进行强制要求的例子"><span class="nav-number">7.1.</span> <span class="nav-text">通过抽象方法来进行强制要求的例子</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Trait的静态成员"><span class="nav-number">8.</span> <span class="nav-text">Trait的静态成员</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#静态变量的例子"><span class="nav-number">8.1.</span> <span class="nav-text">静态变量的例子</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#静态方法的例子"><span class="nav-number">8.2.</span> <span class="nav-text">静态方法的例子</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#静态变量和静态方法的例子"><span class="nav-number">8.3.</span> <span class="nav-text">静态变量和静态方法的例子</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#属性"><span class="nav-number">9.</span> <span class="nav-text">属性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#定义属性的例子"><span class="nav-number">9.1.</span> <span class="nav-text">定义属性的例子</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#冲突的例子"><span class="nav-number">9.2.</span> <span class="nav-text">冲突的例子</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#use的不同"><span class="nav-number">10.</span> <span class="nav-text">use的不同</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#不同use的例子"><span class="nav-number">10.1.</span> <span class="nav-text">不同use的例子</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CLASS-和-TRAIT"><span class="nav-number">11.</span> <span class="nav-text">__CLASS__和__TRAIT__</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Trait单例"><span class="nav-number">12.</span> <span class="nav-text">Trait单例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#调用trait方法"><span class="nav-number">13.</span> <span class="nav-text">调用trait方法</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">littexjing</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
